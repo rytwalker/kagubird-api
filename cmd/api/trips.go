@@ -107,14 +107,14 @@ func (app *application) updateTripHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	var input struct {
-		Name          string    `json:"name"`
-		City          string    `json:"city"`
-		StateCode     string    `json:"state_code"`
-		GooglePlaceID string    `json:"google_place_id"`
-		Lat           float64   `json:"lat"`
-		Lng           float64   `json:"lng"`
-		StartDate     time.Time `json:"start_date"`
-		EndDate       time.Time `json:"end_date"`
+		Name          *string    `json:"name"`
+		City          *string    `json:"city"`
+		StateCode     *string    `json:"state_code"`
+		GooglePlaceID *string    `json:"google_place_id"`
+		Lat           *float64   `json:"lat"`
+		Lng           *float64   `json:"lng"`
+		StartDate     *time.Time `json:"start_date"`
+		EndDate       *time.Time `json:"end_date"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -123,14 +123,32 @@ func (app *application) updateTripHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	trip.Name = input.Name
-	trip.City = input.City
-	trip.StateCode = input.StateCode
-	trip.GooglePlaceID = input.GooglePlaceID
-	trip.Lat = input.Lat
-	trip.Lng = input.Lng
-	trip.StartDate = input.StartDate
-	trip.EndDate = input.EndDate
+	if input.Name != nil {
+		trip.Name = *input.Name
+	}
+
+	if input.City != nil {
+		trip.City = *input.City
+	}
+
+	if input.StateCode != nil {
+		trip.StateCode = *input.StateCode
+	}
+	if input.GooglePlaceID != nil {
+		trip.GooglePlaceID = *input.GooglePlaceID
+	}
+	if input.Lat != nil {
+		trip.Lat = *input.Lat
+	}
+	if input.Lng != nil {
+		trip.Lng = *input.Lng
+	}
+	if input.StartDate != nil {
+		trip.StartDate = *input.StartDate
+	}
+	if input.EndDate != nil {
+		trip.EndDate = *input.EndDate
+	}
 
 	v := validator.New()
 
@@ -141,7 +159,12 @@ func (app *application) updateTripHandler(w http.ResponseWriter, r *http.Request
 
 	err = app.models.Trips.Update(trip)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 

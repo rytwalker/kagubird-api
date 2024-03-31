@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -34,7 +35,10 @@ func (t TripModel) Insert(trip *Trip) error {
 
 	args := []any{trip.Name, trip.City, trip.StateCode, trip.GooglePlaceID, trip.Lat, trip.Lng, trip.StartDate.UTC(), trip.EndDate.UTC()}
 
-	return t.DB.QueryRow(query, args...).Scan(&trip.ID, &trip.CreatedAt, &trip.Version)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return t.DB.QueryRowContext(ctx, query, args...).Scan(&trip.ID, &trip.CreatedAt, &trip.Version)
 }
 
 func (t TripModel) Get(id int64) (*Trip, error) {
@@ -49,7 +53,11 @@ func (t TripModel) Get(id int64) (*Trip, error) {
 
 	var trip Trip
 
-	err := t.DB.QueryRow(query, id).Scan(
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	defer cancel()
+
+	err := t.DB.QueryRowContext(ctx, query, id).Scan(
 		&trip.ID,
 		&trip.CreatedAt,
 		&trip.Name,
@@ -77,7 +85,7 @@ func (t TripModel) Update(trip *Trip) error {
 	query := `
     UPDATE trips
     SET name = $1, city = $2, state_code = $3, google_place_id = $4, lat = $5, lng = $6, start_date = $7, end_date = $8, version = version + 1
-    WHERE id = $9
+    WHERE id = $9 AND version = $10
     RETURNING version`
 
 	args := []any{
@@ -90,9 +98,23 @@ func (t TripModel) Update(trip *Trip) error {
 		trip.StartDate,
 		trip.EndDate,
 		trip.ID,
+		trip.Version,
 	}
 
-	return t.DB.QueryRow(query, args...).Scan(&trip.Version)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := t.DB.QueryRowContext(ctx, query, args...).Scan(&trip.Version)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (t TripModel) Delete(id int64) error {
@@ -104,7 +126,10 @@ func (t TripModel) Delete(id int64) error {
     DELETE FROM trips
     WHERE id = $1`
 
-	result, err := t.DB.Exec(query, id)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := t.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
