@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/rytwalker/kagubird-api/internal/validator"
@@ -144,6 +145,63 @@ func (t TripModel) Delete(id int64) error {
 	}
 
 	return nil
+}
+
+func (t TripModel) GetAll(name string, start_date string, end_date string, filters Filters) ([]*Trip, Metadata, error) {
+	query := fmt.Sprintf(`
+    SELECT count(*) OVER(), id, created_at, name, city, state_code, google_place_id, lat, lng, start_date, end_date, version
+    FROM trips
+    WHERE (to_tsvector('simple', name) @@ plainto_tsquery('simple', $1) OR $1 = '')
+    ORDER BY %s %s, id ASC
+    LIMIT $2 OFFSET $3`, filters.sortColumn(), filters.sortDirection())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{name, filters.limit(), filters.offset()}
+
+	rows, err := t.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+
+	defer rows.Close()
+
+	totalRecords := 0
+	trips := []*Trip{}
+
+	// rows.Next iterates
+	for rows.Next() {
+		var trip Trip
+
+		err := rows.Scan(
+			&totalRecords,
+			&trip.ID,
+			&trip.CreatedAt,
+			&trip.Name,
+			&trip.City,
+			&trip.StateCode,
+			&trip.GooglePlaceID,
+			&trip.Lat,
+			&trip.Lng,
+			&trip.StartDate,
+			&trip.EndDate,
+			&trip.Version,
+		)
+
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+
+		trips = append(trips, &trip)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+	return trips, metadata, nil
 }
 
 func ValidateTrip(v *validator.Validator, trip *Trip) {
