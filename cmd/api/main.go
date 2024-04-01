@@ -11,6 +11,7 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/rytwalker/kagubird-api/internal/data"
+	"github.com/rytwalker/kagubird-api/internal/mailer"
 )
 
 const version = "1.0.0"
@@ -29,12 +30,20 @@ type config struct {
 		burst   int
 		enabled bool
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 type application struct {
 	config config
 	logger *slog.Logger
 	models data.Models
+	mailer mailer.Mailer
 }
 
 func main() {
@@ -49,6 +58,12 @@ func main() {
 	flag.Float64Var(&config.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&config.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&config.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+	//mailer config
+	flag.StringVar(&config.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&config.smtp.port, "smtp-port", 2525, "SMTP port")
+	flag.StringVar(&config.smtp.username, "smtp-username", "2bf0d05014a3b2", "SMTP username")
+	flag.StringVar(&config.smtp.password, "smtp-password", "7380a543a7dab2", "SMTP password")
+	flag.StringVar(&config.smtp.sender, "smtp-sender", "Kagubird <rytwalker@gmail.com>", "SMTP sender")
 
 	flag.Parse()
 
@@ -68,6 +83,7 @@ func main() {
 		config: config,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(config.smtp.host, config.smtp.port, config.smtp.username, config.smtp.password, config.smtp.sender),
 	}
 
 	err = app.serve()
