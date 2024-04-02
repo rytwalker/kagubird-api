@@ -21,6 +21,9 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/locations/:id", app.showLocationHandler)
 	// more todo...
 
+	// TOKENS
+	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
+
 	// TRIPS
 	router.HandlerFunc(http.MethodPost, "/v1/trips", app.createTripHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/trips", app.listTripsHandler)
@@ -32,5 +35,5 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
 
-	return app.recoverPanic(app.rateLimit(router))
+	return app.recoverPanic(app.rateLimit(app.authenticate(router)))
 }
