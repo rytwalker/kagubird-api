@@ -160,3 +160,20 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 
 	return i
 }
+
+// the background() helper accepts an arbitary func as a param and
+// launches a bg goroutine that can recover from panic
+func (app *application) background(fn func()) {
+	app.wg.Add(1)
+	go func() {
+		defer app.wg.Done()
+		// recover any panic
+		defer func() {
+			if err := recover(); err != nil {
+				app.logger.Error(fmt.Sprintf("%v", err))
+			}
+		}()
+
+		fn()
+	}()
+}
