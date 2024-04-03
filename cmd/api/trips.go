@@ -20,6 +20,7 @@ func (app *application) createTripHandler(w http.ResponseWriter, r *http.Request
 		Lng           float64   `json:"lng"`
 		StartDate     time.Time `json:"start_date"`
 		EndDate       time.Time `json:"end_date"`
+		CreatedBy     int64     `json:"created_by"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -38,6 +39,7 @@ func (app *application) createTripHandler(w http.ResponseWriter, r *http.Request
 		Lng:           input.Lng,
 		StartDate:     input.StartDate,
 		EndDate:       input.EndDate,
+		CreatedBy:     input.CreatedBy,
 	}
 
 	v := validator.New()

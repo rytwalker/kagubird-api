@@ -13,6 +13,7 @@ import (
 type Trip struct {
 	ID            int64     `json:"id"`
 	CreatedAt     time.Time `json:"-"`
+	UpdatedAt     time.Time `json:"-"`
 	Name          string    `json:"name"`
 	City          string    `json:"city"`
 	StateCode     string    `json:"state_code"`
@@ -22,6 +23,7 @@ type Trip struct {
 	StartDate     time.Time `json:"start_date"`
 	EndDate       time.Time `json:"end_date"`
 	Version       int32     `json:"version"`
+	CreatedBy     int64     `json:"created_by"`
 }
 
 type TripModel struct {
@@ -30,11 +32,11 @@ type TripModel struct {
 
 func (t TripModel) Insert(trip *Trip) error {
 	query := `
-    INSERT INTO trips (name, city, state_code, google_place_id, lat, lng, start_date, end_date)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    INSERT INTO trips (name, city, state_code, google_place_id, lat, lng, start_date, end_date, created_by)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING id, created_at, version`
 
-	args := []any{trip.Name, trip.City, trip.StateCode, trip.GooglePlaceID, trip.Lat, trip.Lng, trip.StartDate.UTC(), trip.EndDate.UTC()}
+	args := []any{trip.Name, trip.City, trip.StateCode, trip.GooglePlaceID, trip.Lat, trip.Lng, trip.StartDate.UTC(), trip.EndDate.UTC(), trip.CreatedBy}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -48,7 +50,7 @@ func (t TripModel) Get(id int64) (*Trip, error) {
 	}
 
 	query := `
-    SELECT id, created_at, name, city, state_code, google_place_id, lat, lng, start_date, end_date
+    SELECT id, created_at, name, city, state_code, google_place_id, lat, lng, start_date, end_date, created_by, version
     FROM trips
     WHERE id = $1`
 
@@ -69,6 +71,8 @@ func (t TripModel) Get(id int64) (*Trip, error) {
 		&trip.Lng,
 		&trip.StartDate,
 		&trip.EndDate,
+		&trip.CreatedBy,
+		&trip.Version,
 	)
 
 	if err != nil {
@@ -85,7 +89,7 @@ func (t TripModel) Get(id int64) (*Trip, error) {
 func (t TripModel) Update(trip *Trip) error {
 	query := `
     UPDATE trips
-    SET name = $1, city = $2, state_code = $3, google_place_id = $4, lat = $5, lng = $6, start_date = $7, end_date = $8, version = version + 1
+    SET name = $1, city = $2, state_code = $3, google_place_id = $4, lat = $5, lng = $6, start_date = $7, end_date = $8, version = version + 1 
     WHERE id = $9 AND version = $10
     RETURNING version`
 
