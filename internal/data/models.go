@@ -12,6 +12,7 @@ var (
 
 type Models struct {
 	Activities  ActivityModel
+	Locations   LocationModel
 	Permissions PermissionModel
 	Tokens      TokenModel
 	Trips       TripModel
@@ -21,6 +22,7 @@ type Models struct {
 func NewModels(db *sql.DB) Models {
 	return Models{
 		Activities:  ActivityModel{DB: db},
+		Locations:   LocationModel{DB: db},
 		Permissions: PermissionModel{DB: db},
 		Tokens:      TokenModel{DB: db},
 		Trips:       TripModel{DB: db},
