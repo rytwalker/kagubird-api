@@ -41,6 +41,55 @@ func (m LocationModel) Insert(location *Location) error {
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(&location.ID, &location.CreatedAt, &location.Version)
 }
 
+func (m LocationModel) GetAllByActivity(activity_id int64) ([]*Location, error) {
+	query := `
+    SELECT  id, name, address, lat, lng, google_place_id, website, phone, version 
+    FROM locations
+    WHERE activity_id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, activity_id)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	locations := []*Location{}
+
+	// rows.Next iterates
+	for rows.Next() {
+		var location Location
+
+		err := rows.Scan(
+			&location.ID,
+			&location.Name,
+			&location.Address,
+			&location.Lat,
+			&location.Lng,
+			&location.GooglePlaceID,
+			&location.Website,
+			&location.Phone,
+			&location.Version,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		location.ActivityID = activity_id
+
+		locations = append(locations, &location)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return locations, nil
+}
 func ValidateLocation(v *validator.Validator, location *Location) {
 	// name validations
 	v.Check(location.Name != "", "name", "must be provided")

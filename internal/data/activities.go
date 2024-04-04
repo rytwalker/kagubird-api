@@ -9,15 +9,16 @@ import (
 )
 
 type Activity struct {
-	ID        int64     `json:"id"`
-	CreatedAt time.Time `json:"-"`
-	UpdatedAt time.Time `json:"-"`
-	Name      string    `json:"name"`
-	Notes     string    `json:"notes"`
-	StartTime time.Time `json:"start_time"`
-	EndTime   time.Time `json:"end_time"`
-	Version   int32     `json:"version"`
-	TripID    int64     `json:"trip"`
+	ID        int64       `json:"id"`
+	Name      string      `json:"name"`
+	Notes     string      `json:"notes"`
+	StartTime time.Time   `json:"start_time"`
+	EndTime   time.Time   `json:"end_time"`
+	TripID    int64       `json:"trip"`
+	Locations []*Location `json:"locations"`
+	Version   int32       `json:"version"`
+	CreatedAt time.Time   `json:"-"`
+	UpdatedAt time.Time   `json:"-"`
 }
 
 type ActivityModel struct {
@@ -36,6 +37,52 @@ func (m ActivityModel) Insert(activity *Activity) error {
 	defer cancel()
 
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(&activity.ID, &activity.CreatedAt, &activity.Version)
+}
+
+func (m ActivityModel) GetAllByTrip(trip_id int64) ([]*Activity, error) {
+	query := `
+    SELECT  id, created_at, name, notes, start_time, end_time, version 
+    FROM activities
+    WHERE trip_id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, trip_id)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	activities := []*Activity{}
+	// rows.Next iterates
+	for rows.Next() {
+		var activity Activity
+
+		err := rows.Scan(
+			&activity.ID,
+			&activity.CreatedAt,
+			&activity.Name,
+			&activity.Notes,
+			&activity.StartTime,
+			&activity.EndTime,
+			&activity.Version,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		activity.TripID = trip_id
+		activities = append(activities, &activity)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return activities, nil
 }
 
 func ValidateActivity(v *validator.Validator, activity *Activity) {

@@ -48,8 +48,6 @@ func (app *application) createTripHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	fmt.Fprintf(w, "%+v\n", input)
-
 	err = app.models.Trips.Insert(trip)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -83,6 +81,24 @@ func (app *application) showTripHandler(w http.ResponseWriter, r *http.Request) 
 		}
 		return
 	}
+
+	activities, err := app.models.Activities.GetAllByTrip(trip.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	for _, activity := range activities {
+		locations, err := app.models.Locations.GetAllByActivity(activity.ID)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+
+		activity.Locations = locations
+	}
+
+	trip.Activities = activities
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"trip": trip}, nil)
 	if err != nil {

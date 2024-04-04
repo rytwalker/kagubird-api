@@ -11,19 +11,20 @@ import (
 )
 
 type Trip struct {
-	ID            int64     `json:"id"`
-	CreatedAt     time.Time `json:"-"`
-	UpdatedAt     time.Time `json:"-"`
-	Name          string    `json:"name"`
-	City          string    `json:"city"`
-	StateCode     string    `json:"state_code"`
-	GooglePlaceID string    `json:"google_place_id"`
-	Lat           float64   `json:"lat"`
-	Lng           float64   `json:"lng"`
-	StartDate     time.Time `json:"start_date"`
-	EndDate       time.Time `json:"end_date"`
-	Version       int32     `json:"version"`
-	CreatedBy     int64     `json:"created_by"`
+	ID            int64       `json:"id"`
+	Name          string      `json:"name"`
+	City          string      `json:"city"`
+	StateCode     string      `json:"state_code"`
+	GooglePlaceID string      `json:"google_place_id"`
+	Lat           float64     `json:"lat"`
+	Lng           float64     `json:"lng"`
+	StartDate     time.Time   `json:"start_date"`
+	EndDate       time.Time   `json:"end_date"`
+	CreatedBy     int64       `json:"created_by"`
+	Activities    []*Activity `json:"activities"`
+	Version       int32       `json:"version"`
+	CreatedAt     time.Time   `json:"-"`
+	UpdatedAt     time.Time   `json:"-"`
 }
 
 type TripModel struct {
@@ -83,6 +84,13 @@ func (t TripModel) Get(id int64) (*Trip, error) {
 			return nil, err
 		}
 	}
+	// // activities, err := ActivityModel.GetAllByTrip(trip.ID)
+	// activities, err := Models.Activities.GetAllByTrip(trip.ID)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// trip.Activities = activities
 	return &trip, nil
 }
 
