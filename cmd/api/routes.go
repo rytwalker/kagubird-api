@@ -13,8 +13,9 @@ func (app *application) routes() http.Handler {
 	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
-	// ITINERY ITEMS
-	// todo...
+
+	// ACTIVITIES
+	router.HandlerFunc(http.MethodPost, "/v1/activities", app.createActivityHandler)
 
 	// LOCATIONS
 	router.HandlerFunc(http.MethodPost, "/v1/locations", app.createLocationHandler)
