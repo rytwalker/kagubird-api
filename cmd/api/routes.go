@@ -22,6 +22,9 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/locations/:id", app.showLocationHandler)
 	// more todo...
 
+	// STAYS
+	router.HandlerFunc(http.MethodPost, "/v1/stays", app.createStayHandler)
+
 	// TOKENS
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 

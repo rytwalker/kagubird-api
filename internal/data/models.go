@@ -14,6 +14,7 @@ type Models struct {
 	Activities  ActivityModel
 	Locations   LocationModel
 	Permissions PermissionModel
+	Stays       StayModel
 	Tokens      TokenModel
 	Trips       TripModel
 	Users       UserModel
@@ -24,6 +25,7 @@ func NewModels(db *sql.DB) Models {
 		Activities:  ActivityModel{DB: db},
 		Locations:   LocationModel{DB: db},
 		Permissions: PermissionModel{DB: db},
+		Stays:       StayModel{DB: db},
 		Tokens:      TokenModel{DB: db},
 		Trips:       TripModel{DB: db},
 		Users:       UserModel{DB: db},
