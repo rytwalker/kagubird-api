@@ -16,6 +16,8 @@ func (app *application) routes() http.Handler {
 
 	// ACTIVITIES
 	router.HandlerFunc(http.MethodPost, "/v1/activities", app.createActivityHandler)
+	router.HandlerFunc(http.MethodPatch, "/v1/activities/:id", app.updateActivityHandler)
+	router.HandlerFunc(http.MethodDelete, "/v1/activities/:id", app.deleteActivityHandler)
 
 	// LOCATIONS
 	router.HandlerFunc(http.MethodPost, "/v1/locations", app.createLocationHandler)
