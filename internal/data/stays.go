@@ -47,7 +47,7 @@ func (m StayModel) GetAllByTrip(trip_id int64) ([]*Stay, error) {
 	query := `
     SELECT  id, name, address, lat, lng,  start_time, end_time, link, phone, type, version 
     FROM stays
-    WHERE activity_id = $1`
+    WHERE trip_id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -94,6 +94,7 @@ func (m StayModel) GetAllByTrip(trip_id int64) ([]*Stay, error) {
 
 	return stays, nil
 }
+
 func ValidateStay(v *validator.Validator, stay *Stay) {
 	// name validations
 	v.Check(stay.Name != "", "name", "must be provided")

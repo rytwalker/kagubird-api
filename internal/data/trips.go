@@ -22,6 +22,7 @@ type Trip struct {
 	EndDate       time.Time   `json:"end_date"`
 	CreatedBy     int64       `json:"created_by"`
 	Activities    []*Activity `json:"activities"`
+	Stays         []*Stay     `json:"stays"`
 	Version       int32       `json:"version"`
 	CreatedAt     time.Time   `json:"-"`
 	UpdatedAt     time.Time   `json:"-"`
