@@ -148,3 +148,32 @@ func (app *application) deleteActivityHandler(w http.ResponseWriter, r *http.Req
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) listActivitiesHandler(w http.ResponseWriter, r *http.Request) {
+	tripID, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	activities, err := app.models.Activities.GetAllByTrip(tripID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	for _, activity := range activities {
+		locations, err := app.models.Locations.GetAllByActivity(activity.ID)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+
+		activity.Locations = locations
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"activities": activities}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
