@@ -13,6 +13,8 @@ f you prefer the allow list template instead of the deny list, see community tem
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+*.env
+*.envrc
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
@@ -21,3 +23,4 @@ f you prefer the allow list template instead of the deny list, see community tem
 go.work
 
 **/.DS_Store
+bin/
