@@ -1,0 +1,8 @@
+{
+  email rytwalker@gmail.com
+}
+
+api.kagubird.com {
+  respond /v1/metrics "Not Permitted" 403
+  reverse_proxy localhost:4000
+}
