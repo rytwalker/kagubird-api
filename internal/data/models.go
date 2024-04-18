@@ -16,6 +16,7 @@ type Models struct {
 	Permissions PermissionModel
 	Stays       StayModel
 	Tokens      TokenModel
+	TripGoers   TripGoerModel
 	Trips       TripModel
 	Users       UserModel
 }
@@ -27,6 +28,7 @@ func NewModels(db *sql.DB) Models {
 		Permissions: PermissionModel{DB: db},
 		Stays:       StayModel{DB: db},
 		Tokens:      TokenModel{DB: db},
+		TripGoers:   TripGoerModel{DB: db},
 		Trips:       TripModel{DB: db},
 		Users:       UserModel{DB: db},
 	}

@@ -62,5 +62,4 @@ func (app *application) createStayHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-	fmt.Fprintln(w, "Create a new location")
 }

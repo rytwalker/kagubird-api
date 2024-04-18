@@ -58,7 +58,6 @@ func (app *application) createLocationHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-	fmt.Fprintln(w, "Create a new location")
 }
 
 func (app *application) showLocationHandler(w http.ResponseWriter, r *http.Request) {

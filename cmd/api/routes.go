@@ -35,6 +35,9 @@ func (app *application) routes() http.Handler {
 	// TOKENS
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 
+	// TRIP-GOERS
+	router.HandlerFunc(http.MethodPost, "/v1/tripgoers", app.addTripGoer)
+
 	// TRIPS
 	router.HandlerFunc(http.MethodPost, "/v1/trips", app.requireActivatedUser(app.createTripHandler))
 	router.HandlerFunc(http.MethodGet, "/v1/trips", app.requireActivatedUser(app.listTripsHandler))

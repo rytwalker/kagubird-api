@@ -84,7 +84,6 @@ func (m StayModel) GetAllByTrip(trip_id int64) ([]*Stay, error) {
 		}
 
 		stay.TripID = trip_id
-
 		stays = append(stays, &stay)
 	}
 

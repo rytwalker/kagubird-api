@@ -21,7 +21,7 @@ confirm:
 ## run/api: run the cmd/api application
 .PHONY: run/api
 run/api:
-	go run ./cmd/api -db-dsn=${KAGUBIRD_DB_DSN}
+	go run ./cmd/api -db-dsn=${KAGUBIRD_DB_DSN} -cors-trusted-origins="http://localhost:3000"
 
 ## db/psql: connect to the database using psql
 .PHONY: db/psql

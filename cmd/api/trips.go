@@ -100,6 +100,22 @@ func (app *application) showTripHandler(w http.ResponseWriter, r *http.Request) 
 
 	trip.Activities = activities
 
+	stays, err := app.models.Stays.GetAllByTrip(trip.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	trip.Stays = stays
+
+	users, err := app.models.Users.GetAllByTrip(trip.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	trip.TripGoers = users
+
 	err = app.writeJSON(w, http.StatusOK, envelope{"trip": trip}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

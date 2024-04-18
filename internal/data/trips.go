@@ -23,6 +23,7 @@ type Trip struct {
 	CreatedBy     int64       `json:"created_by"`
 	Activities    []*Activity `json:"activities"`
 	Stays         []*Stay     `json:"stays"`
+	TripGoers     []*User     `json:"tripgoers"`
 	Version       int32       `json:"version"`
 	CreatedAt     time.Time   `json:"-"`
 	UpdatedAt     time.Time   `json:"-"`

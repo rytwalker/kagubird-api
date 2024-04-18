@@ -99,6 +99,54 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
+func (m UserModel) GetAllByTrip(tripID int64) ([]*User, error) {
+	query := `
+    SELECT  u.id, u.created_at, u.name, u.email, u.password_hash, u.activated, u.version
+    FROM trips t
+    JOIN trip_goers tg ON t.id = tg.trip_id
+    JOIN users u ON tg.user_id = u.id
+    WHERE t.id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, tripID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	users := []*User{}
+
+	// rows.Next iterates
+	for rows.Next() {
+		var user User
+
+		err := rows.Scan(
+			&user.ID,
+			&user.CreatedAt,
+			&user.Name,
+			&user.Email,
+			&user.Password.hash,
+			&user.Activated,
+			&user.Version,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, &user)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (m UserModel) Update(user *User) error {
 	query := `
     UPDATE users 
