@@ -20,7 +20,7 @@ User=kagubird
 Group=kagubird
 EnvironmentFile=/etc/environment
 WorkingDirectory=/home/kagubird
-ExecStart=/home/kagubird/api -port=4000 -db-dsn=${KAGUBIRD_DB_DSN} -env=production
+ExecStart=/home/kagubird/api -port=4000 -db-dsn=${KAGUBIRD_DB_DSN} -cors-trusted-origins="https://api.kagubird.com" -env=production
 
 # Automatically restart the service after a 5-second wait if it exits with a non-zero 
 # exit code. If it restarts more than 5 times in 600 seconds, then the rate limit we
